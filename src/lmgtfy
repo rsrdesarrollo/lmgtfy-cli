@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    #fallback python 2.7
+    from urllib import urlencode
+
+import argparse
+
+SEARCH_ENGINES = dict(
+    web='w', images='i', videos='v', maps='m', news='n', shopping='s',
+    books='b', finance='f', schollar='sc'
+)
+
+## http://lmgtfy.com/?t=sc&q=a
+
+def valid_engine(e):
+    if e not in SEARCH_ENGINES:
+        raise argparse.ArgumentTypeError("{} is not a valid search engine".format(e))
+    else:
+        return e
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        '-e','--engine',
+        help="Search engine. valids are {}. Default:web".format(
+            ",".join(SEARCH_ENGINES.keys())
+        ),
+        type=valid_engine,
+        default='web'
+    )
+    parser.add_argument('query', nargs="+")
+    ops = parser.parse_args()
+
+    query = urlencode({
+        't':SEARCH_ENGINES[ops.engine],
+        'q':" ".join(ops.query)
+    })
+
+    print("http://lmgtfy.com/?{}".format(query))
