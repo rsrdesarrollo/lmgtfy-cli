@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+import argparse
 
 try:
     from urllib.parse import urlencode
@@ -7,7 +8,14 @@ except ImportError:
     #fallback python 2.7
     from urllib import urlencode
 
-import argparse
+try:
+    import clipboard
+except ImportError:
+    import sys
+
+    clipboard = None
+    print("WARN: no clipboard support", file=sys.stderr)
+
 
 SEARCH_ENGINES = dict(
     web='w', images='i', videos='v', maps='m', news='n', shopping='s',
@@ -32,6 +40,11 @@ if __name__ == '__main__':
         type=valid_engine,
         default='web'
     )
+    parser.add_argument(
+        '--no-clip',
+        help="Don't copy url to the clipboard",
+        action = 'store_true'
+    )
     parser.add_argument('query', nargs="+")
     ops = parser.parse_args()
 
@@ -40,4 +53,9 @@ if __name__ == '__main__':
         'q':" ".join(ops.query)
     })
 
-    print("http://lmgtfy.com/?{}".format(query))
+    url = "http://lmgtfy.com/?{}".format(query)
+
+    if clipboard and not ops.no_clip:
+        clipboard.copy(url)
+
+    print(url)
